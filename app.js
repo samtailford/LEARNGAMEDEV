@@ -11,6 +11,7 @@ const state = {
 };
 
 const USER_RECOMMENDED_MIN_SCORE = 2;
+const WEB3FORMS_ACCESS_KEY = '444d642e-e41c-48eb-9d65-38c0086ddcbb'; // from web3forms.com, tied to samtailford3@gmail.com
 
 function esc(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -399,19 +400,49 @@ function renderMore() {
           <input type="email" id="feedback-email" placeholder="Your email (optional)">
           <textarea id="feedback-text" placeholder="Found a dead link, a bad tutorial, or just have an idea? Say it here."></textarea>
           <button id="feedback-send">Send feedback</button>
-          <p class="hint">Right now this opens your email client with the message pre-filled — no account or server needed. We'll swap this for a proper form once the site's deployed.</p>
+          <p class="hint" id="feedback-hint"></p>
         </div>
       </div>
     </div>
   `;
 
-  document.getElementById('feedback-send').addEventListener('click', () => {
+  document.getElementById('feedback-send').addEventListener('click', async () => {
     const email = document.getElementById('feedback-email').value.trim();
     const text = document.getElementById('feedback-text').value.trim();
+    const hint = document.getElementById('feedback-hint');
+    const btn = document.getElementById('feedback-send');
     if (!text) { document.getElementById('feedback-text').focus(); return; }
-    const subject = encodeURIComponent('LearnGameDev feedback');
-    const body = encodeURIComponent(text + (email ? `\n\nReply to: ${email}` : ''));
-    window.location.href = `mailto:samtailford3@gmail.com?subject=${subject}&body=${body}`;
+
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    hint.textContent = '';
+
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_ACCESS_KEY,
+          subject: 'LearnGameDev feedback',
+          message: text,
+          email: email || 'no-reply@learngamedev.com',
+          from_name: email ? email : 'Anonymous visitor'
+        })
+      });
+      const result = await res.json();
+      if (result.success) {
+        document.getElementById('feedback-text').value = '';
+        document.getElementById('feedback-email').value = '';
+        btn.textContent = 'Send feedback';
+        hint.textContent = "Sent — thanks!";
+      } else {
+        throw new Error(result.message || 'Something went wrong');
+      }
+    } catch (err) {
+      btn.textContent = 'Send feedback';
+      hint.textContent = "Couldn't send that — try again in a moment.";
+    }
+    btn.disabled = false;
   });
 }
 

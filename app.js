@@ -1,0 +1,338 @@
+const app = document.getElementById('app');
+const toolNav = document.getElementById('tool-nav');
+
+const state = {
+  era: 'all',       // 'all' | 'current' | 'older'
+  category: 'all',
+  query: '',
+  sort: 'default',  // 'default' | 'rating'
+  userRecommended: false,
+  verifiedOnly: false
+};
+
+const USER_RECOMMENDED_MIN_SCORE = 2;
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function loadData() {
+  // DATA is loaded inline from data.js (no fetch) so this page also works
+  // when opened directly as a local file, with no server required.
+}
+
+function buildNav() {
+  toolNav.innerHTML = Object.keys(TOOL_META).map(key => {
+    const meta = TOOL_META[key];
+    return `<a href="#/${key}" data-tool="${key}">${TOOL_ICONS[key]}${meta.label}</a>`;
+  }).join('');
+}
+
+function renderHome() {
+  document.title = 'LearnGameDev — Free tutorials that actually finish something';
+  const cards = Object.keys(TOOL_META).map(key => {
+    const meta = TOOL_META[key];
+    const total = DATA[key].current.length + DATA[key].older.length;
+    return `
+      <a href="#/${key}" class="tool-card" style="--tool-accent:${meta.accent}">
+        <div class="icon">${TOOL_ICONS[key]}</div>
+        <h2>${meta.label}</h2>
+        <p class="tagline">${meta.tagline}</p>
+        <span class="count">${total}+ tutorials</span>
+      </a>`;
+  }).join('');
+
+  app.innerHTML = `
+    <div class="hero">
+      <h1>Free tutorials that actually finish something.</h1>
+      <p>Games can be made with just one of the game engines and some free assets found in <a href="#/more">More</a>. This compendium covers every aspect of gaming — pick your tool.</p>
+    </div>
+    <div class="tool-grid">${cards}</div>
+  `;
+}
+
+function allEntries(toolKey) {
+  const t = DATA[toolKey];
+  return [
+    ...t.current.map(e => ({...e, era: 'current'})),
+    ...t.older.map(e => ({...e, era: 'older'})),
+    ...(t.outdated || []).map(e => ({...e, era: 'outdated'}))
+  ];
+}
+
+function renderTool(toolKey) {
+  const meta = TOOL_META[toolKey];
+  if (!meta) { location.hash = '#/'; return; }
+  document.title = `${meta.label} — LearnGameDev`;
+
+  const entries = allEntries(toolKey).map(e => ({ ...e, vote: getVoteState(e.id) }));
+  const categories = ['all', ...Array.from(new Set(entries.map(e => e.category)))];
+
+  let filtered = entries.filter(e => {
+    if (state.era !== 'all' && e.era !== state.era) return false;
+    if (state.category !== 'all' && e.category !== state.category) return false;
+    if (state.verifiedOnly && !e.verified) return false;
+    if (state.userRecommended && e.vote.score < USER_RECOMMENDED_MIN_SCORE) return false;
+    if (state.query) {
+      const q = state.query.toLowerCase();
+      const hay = `${e.title} ${e.creator} ${e.category} ${e.outcome}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  if (state.sort === 'rating' || state.userRecommended) {
+    filtered = filtered.slice().sort((a, b) => b.vote.score - a.vote.score || b.vote.up - a.vote.up);
+  }
+
+  const currentCount = entries.filter(e => e.era === 'current').length;
+  const olderCount = entries.filter(e => e.era === 'older').length;
+  const outdatedCount = entries.filter(e => e.era === 'outdated').length;
+  const verifiedCount = entries.filter(e => e.verified).length;
+  const userRecCount = entries.filter(e => e.vote.score >= USER_RECOMMENDED_MIN_SCORE).length;
+
+  app.innerHTML = `
+    <a href="#/" class="back-link">&larr; All tools</a>
+    <div class="tool-header" style="--tool-accent:${meta.accent}">
+      <div class="icon">${TOOL_ICONS[toolKey]}</div>
+      <div class="tool-header-text">
+        <h1>${meta.label}</h1>
+        <p class="sub">${entries.length} vetted free tutorials &middot; ${meta.tagline}</p>
+      </div>
+      <a class="get-tool-btn" href="${esc(meta.downloadUrl)}" target="_blank" rel="noopener noreferrer">
+        Get ${esc(meta.label)} &#8599;
+        <span class="get-tool-note">${esc(meta.downloadNote)}</span>
+      </a>
+    </div>
+
+    <div class="controls" style="--tool-accent:${meta.accent}">
+      <div class="search-row">
+        <input type="text" id="search-input" placeholder="Search title, creator, or outcome..." value="${esc(state.query)}">
+        <div class="era-toggle">
+          <button data-era="all" class="${state.era === 'all' ? 'active' : ''}">All (${entries.length})</button>
+          <button data-era="current" class="${state.era === 'current' ? 'active' : ''}">Current (${currentCount})</button>
+          <button data-era="older" class="${state.era === 'older' ? 'active' : ''}">Older (${olderCount})</button>
+          <button data-era="outdated" class="${state.era === 'outdated' ? 'active' : ''}">Outdated (${outdatedCount})</button>
+        </div>
+      </div>
+      <div class="sort-row">
+        <div class="era-toggle">
+          <button data-sort="default" class="${state.sort === 'default' ? 'active' : ''}">Default order</button>
+          <button data-sort="rating" class="${state.sort === 'rating' ? 'active' : ''}">Highest rated</button>
+        </div>
+        <div class="badge-toggles">
+          <button id="verified-toggle" class="verified-pill ${state.verifiedOnly ? 'active' : ''}">&#10003; Verified (${verifiedCount})</button>
+          <button id="user-rec-toggle" class="recommended-pill ${state.userRecommended ? 'active' : ''}">&#9733; User Recommended (${userRecCount})</button>
+        </div>
+      </div>
+      <div class="category-pills">
+        ${categories.map(c => `<button data-cat="${esc(c)}" class="${state.category === c ? 'active' : ''}">${c === 'all' ? 'All categories' : esc(c)}</button>`).join('')}
+      </div>
+    </div>
+
+    <p class="result-count">${filtered.length} tutorial${filtered.length === 1 ? '' : 's'}</p>
+
+    <div class="card-grid" style="--tool-accent:${meta.accent}">
+      ${filtered.length ? filtered.map(cardHtml).join('') : ''}
+    </div>
+    ${filtered.length ? '' : '<p class="empty-state">No tutorials match those filters. Try clearing the search or category.</p>'}
+  `;
+
+  document.getElementById('search-input').addEventListener('input', e => {
+    state.query = e.target.value;
+    renderTool(toolKey);
+    document.getElementById('search-input').focus();
+    const val = document.getElementById('search-input').value;
+    document.getElementById('search-input').setSelectionRange(val.length, val.length);
+  });
+
+  app.querySelectorAll('.era-toggle button[data-era]').forEach(btn => {
+    btn.addEventListener('click', () => { state.era = btn.dataset.era; renderTool(toolKey); });
+  });
+  app.querySelectorAll('.era-toggle button[data-sort]').forEach(btn => {
+    btn.addEventListener('click', () => { state.sort = btn.dataset.sort; renderTool(toolKey); });
+  });
+  document.getElementById('verified-toggle').addEventListener('click', () => {
+    state.verifiedOnly = !state.verifiedOnly;
+    renderTool(toolKey);
+  });
+  document.getElementById('user-rec-toggle').addEventListener('click', () => {
+    state.userRecommended = !state.userRecommended;
+    renderTool(toolKey);
+  });
+  app.querySelectorAll('.category-pills button').forEach(btn => {
+    btn.addEventListener('click', () => { state.category = btn.dataset.cat; renderTool(toolKey); });
+  });
+
+  app.querySelector('.card-grid').addEventListener('click', e => {
+    const btn = e.target.closest('.vote-btn');
+    if (!btn) return;
+    castVote(btn.dataset.id, btn.dataset.dir);
+    renderTool(toolKey);
+  });
+}
+
+function cardHtml(e) {
+  const signupFlag = /signup|account|unity id/i.test(e.access) && !/no signup/i.test(e.access);
+  const v = e.vote;
+  const userRecommended = v.score >= USER_RECOMMENDED_MIN_SCORE;
+  return `
+    <div class="entry-card">
+      <div class="card-top-row">
+        <span class="cat-tag">${esc(e.category)}</span>
+        <div class="badge-group">
+          ${e.verified ? '<span class="verified-badge">&#10003; Verified</span>' : ''}
+          ${userRecommended ? '<span class="rec-badge">&#9733; User Recommended</span>' : ''}
+        </div>
+      </div>
+      <h3>${esc(e.title)}</h3>
+      <p class="creator">${esc(e.creator)}</p>
+      <p class="outcome">${esc(e.outcome)}</p>
+      <div class="meta-row">
+        <span class="meta-chip era-${e.era}">${e.era === 'current' ? 'Current' : e.era === 'older' ? 'Older' : 'Outdated'}</span>
+        <span class="meta-chip">${esc(e.level)}</span>
+        <span class="meta-chip">${esc(e.length)}</span>
+        <span class="meta-chip">${esc(e.date)}</span>
+        ${signupFlag ? `<span class="meta-chip signup">Signup required</span>` : ''}
+      </div>
+      <div class="card-bottom-row">
+        <a class="watch-link" href="${esc(e.link)}" target="_blank" rel="noopener noreferrer">View tutorial &rarr;</a>
+        <div class="vote-group">
+          <button class="vote-btn ${v.myVote === 'up' ? 'voted' : ''}" data-id="${esc(e.id)}" data-dir="up" title="Helpful">&#128077; <span>${v.up}</span></button>
+          <button class="vote-btn ${v.myVote === 'down' ? 'voted' : ''}" data-id="${esc(e.id)}" data-dir="down" title="Not helpful">&#128078; <span>${v.down}</span></button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderMore() {
+  document.title = 'More — LearnGameDev';
+
+  const hubSections = Object.keys(TEXT_HUBS).map(key => {
+    const meta = TOOL_META[key];
+    const hubs = TEXT_HUBS[key].map(h => `
+      <a class="resource-card" href="${esc(h.url)}" target="_blank" rel="noopener noreferrer">
+        <span class="r-name">${esc(h.name)}</span>
+        <span class="r-desc">${esc(h.desc)}</span>
+      </a>`).join('');
+    return `
+      <div class="hub-tool-block">
+        <h3>${meta.label}</h3>
+        <div class="hub-list">${hubs}</div>
+      </div>`;
+  }).join('');
+
+  const assetCards = ASSET_SITES.map(a => `
+    <a class="resource-card" href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">
+      <span class="r-name">${esc(a.name)}</span>
+      <span class="r-desc">${esc(a.desc)}</span>
+    </a>`).join('');
+
+  const templateLabels = { godot: 'Godot', unity: 'Unity', unreal: 'Unreal', construct3: 'Construct 3', figma: 'Figma' };
+  const templateSections = Object.keys(TEMPLATES).map(key => {
+    const cards = TEMPLATES[key].map(t => `
+      <a class="resource-card" href="${esc(t.url)}" target="_blank" rel="noopener noreferrer">
+        <span class="r-name">${esc(t.name)}</span>
+        <span class="r-desc">${esc(t.desc)}</span>
+      </a>`).join('');
+    return `
+      <div class="hub-tool-block">
+        <h3>${templateLabels[key] || key}</h3>
+        <div class="hub-list">${cards}</div>
+      </div>`;
+  }).join('');
+
+  app.innerHTML = `
+    <a href="#/" class="back-link">&larr; All tools</a>
+    <div class="more-page">
+      <h1>More</h1>
+      <p class="lead">Text-based tutorial hubs for when video isn't your thing, free asset sites to actually build with, and a way to reach us.</p>
+
+      <div class="more-section">
+        <h2>Text-based tutorial hubs</h2>
+        ${hubSections}
+      </div>
+
+      <div class="more-section">
+        <h2>Free asset sites</h2>
+        <div class="asset-grid">${assetCards}</div>
+      </div>
+
+      <div class="more-section">
+        <h2>Free full-game templates</h2>
+        <p class="lead" style="margin-bottom:20px;">Complete, CC0/free-to-use starter projects — not tutorials, actual downloadable projects you can build straight on top of.</p>
+        ${templateSections}
+      </div>
+
+      <div class="more-section">
+        <h2>Credits</h2>
+        <div class="credits-box">
+          <p><strong>LearnGameDev</strong> is curated and built by <strong>Sam</strong>.</p>
+          <p>Every tutorial links directly to its original creator — full credit for the actual teaching belongs to them, not this site. This is a curation layer, not a replacement.</p>
+        </div>
+      </div>
+
+      <div class="more-section">
+        <h2>Contact</h2>
+        <div class="contact-box">
+          <p>Email: <strong>hello@learngamedev.com</strong> <em>(placeholder — swap once the domain's live)</em></p>
+          <p>Socials: coming soon.</p>
+        </div>
+      </div>
+
+      <div class="more-section">
+        <h2>Feedback</h2>
+        <div class="feedback-box">
+          <input type="email" id="feedback-email" placeholder="Your email (optional)">
+          <textarea id="feedback-text" placeholder="Found a dead link, a bad tutorial, or just have an idea? Say it here."></textarea>
+          <button id="feedback-send">Send feedback</button>
+          <p class="hint">Right now this opens your email client with the message pre-filled — no account or server needed. We'll swap this for a proper form once the site's deployed.</p>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('feedback-send').addEventListener('click', () => {
+    const email = document.getElementById('feedback-email').value.trim();
+    const text = document.getElementById('feedback-text').value.trim();
+    if (!text) { document.getElementById('feedback-text').focus(); return; }
+    const subject = encodeURIComponent('LearnGameDev feedback');
+    const body = encodeURIComponent(text + (email ? `\n\nReply to: ${email}` : ''));
+    window.location.href = `mailto:hello@learngamedev.com?subject=${subject}&body=${body}`;
+  });
+}
+
+function route() {
+  const hash = location.hash.replace(/^#\/?/, '');
+  toolNav.querySelectorAll('a').forEach(a => a.classList.toggle('active', a.dataset.tool === hash));
+  const fab = document.querySelector('.more-fab');
+  if (fab) fab.style.display = hash === 'more' ? 'none' : '';
+
+  if (!hash) {
+    renderHome();
+    return;
+  }
+  if (hash === 'more') {
+    renderMore();
+    return;
+  }
+  if (TOOL_META[hash]) {
+    state.era = 'all';
+    state.category = 'all';
+    state.query = '';
+    state.sort = 'default';
+    state.userRecommended = false;
+    state.verifiedOnly = false;
+    renderTool(hash);
+    return;
+  }
+  location.hash = '#/';
+}
+
+window.addEventListener('hashchange', route);
+
+(async function init() {
+  buildNav();
+  await loadData();
+  route();
+})();

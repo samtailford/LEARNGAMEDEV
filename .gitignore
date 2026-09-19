@@ -1,0 +1,4 @@
+.claude/
+index.bundled.html
+_add_*.py
+__pycache__/

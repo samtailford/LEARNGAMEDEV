@@ -380,7 +380,7 @@ function renderMore() {
       <div class="more-section">
         <h2>Credits</h2>
         <div class="credits-box">
-          <p><strong>LearnGameDev</strong> is curated and built by <strong>Sam</strong>.</p>
+          <p>&copy; 2026 ST / LearnGameDev</p>
           <p>Every tutorial links directly to its original creator — full credit for the actual teaching belongs to them, not this site. This is a curation layer, not a replacement.</p>
         </div>
       </div>

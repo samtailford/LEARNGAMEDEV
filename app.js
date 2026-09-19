@@ -83,12 +83,16 @@ function renderAccountArea() {
   const user = getCurrentUser();
   const profile = getCurrentProfile();
   if (!user) {
-    area.innerHTML = `<button class="signin-btn" id="signin-open-btn">Sign in</button>`;
+    area.innerHTML = `
+      <a href="#/feed" class="feed-link${location.hash === '#/feed' ? ' active' : ''}">Feed</a>
+      <button class="signin-btn" id="signin-open-btn">Sign in</button>
+    `;
     document.getElementById('signin-open-btn').addEventListener('click', () => openAuthModal('signin'));
     return;
   }
   const name = profile ? profile.username : user.email;
   area.innerHTML = `
+    <a href="#/feed" class="feed-link${location.hash === '#/feed' ? ' active' : ''}">Feed</a>
     <a href="#/account" class="account-pill">${esc(name)}</a>
     <button class="signout-btn" id="signout-btn" title="Sign out">&#8594;</button>
   `;
@@ -379,6 +383,7 @@ function cardHtml(e) {
         <span class="meta-chip">${esc(e.level)}</span>
         <span class="meta-chip">${esc(e.length)}</span>
         <span class="meta-chip">${esc(e.date)}</span>
+        ${e.video ? `<span class="meta-chip video">Video</span>` : ''}
         ${signupFlag ? `<span class="meta-chip signup">Signup required</span>` : ''}
       </div>
       <div class="card-bottom-row">
@@ -560,6 +565,17 @@ function renderAccount() {
   });
 }
 
+function renderFeed() {
+  document.title = 'Feed — LearnGameDev';
+  app.innerHTML = `
+    <a href="#/" class="back-link">&larr; All tools</a>
+    <div class="hero">
+      <h1>Feed</h1>
+      <p>Coming soon. This is where you'll see posts and shared progress from people you follow.</p>
+    </div>
+  `;
+}
+
 function route() {
   const hash = location.hash.replace(/^#\/?/, '');
   toolNav.querySelectorAll('a').forEach(a => a.classList.toggle('active', a.dataset.tool === hash));
@@ -576,6 +592,10 @@ function route() {
   }
   if (hash === 'account') {
     renderAccount();
+    return;
+  }
+  if (hash === 'feed') {
+    renderFeed();
     return;
   }
   if (TOOL_META[hash]) {

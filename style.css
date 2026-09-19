@@ -331,6 +331,7 @@ main { max-width: 1120px; margin: 0 auto; padding: 40px 24px 80px; }
 .meta-chip.era-current { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, var(--border)); }
 .meta-chip.era-outdated { color: #e08a4f; border-color: rgba(224, 138, 79, 0.4); }
 .meta-chip.signup { color: #f0b64c; border-color: rgba(240, 182, 76, 0.35); }
+.meta-chip.video { color: #6fb8e0; border-color: rgba(111, 184, 224, 0.35); }
 
 .card-bottom-row {
   margin-top: auto;
@@ -383,6 +384,14 @@ main { max-width: 1120px; margin: 0 auto; padding: 40px 24px 80px; }
 }
 
 .account-area { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+.feed-link {
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 4px;
+}
+.feed-link:hover { color: var(--text); }
+.feed-link.active { color: var(--accent); }
 .signin-btn {
   background: var(--accent);
   color: #06231f;

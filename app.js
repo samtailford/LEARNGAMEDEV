@@ -387,14 +387,6 @@ function renderMore() {
       </div>
 
       <div class="more-section">
-        <h2>Contact</h2>
-        <div class="contact-box">
-          <p>Email: <strong>samtailford3@gmail.com</strong></p>
-          <p>Socials: coming soon.</p>
-        </div>
-      </div>
-
-      <div class="more-section">
         <h2>Feedback</h2>
         <div class="feedback-box">
           <input type="email" id="feedback-email" placeholder="Your email (optional)">

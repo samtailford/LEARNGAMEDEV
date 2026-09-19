@@ -86,3 +86,40 @@ $$;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- Votes: one row per (account, tutorial), account-backed so it's a real
+-- account-wide vote rather than a per-browser guess. Raw rows stay private
+-- to their owner; a public view exposes only the aggregate counts.
+create table public.votes (
+  id bigint generated always as identity primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  tutorial_id text not null,
+  direction text not null check (direction in ('up', 'down')),
+  created_at timestamptz not null default now(),
+  unique (user_id, tutorial_id)
+);
+
+alter table public.votes enable row level security;
+
+create policy "Users can view their own votes"
+  on public.votes for select
+  using (auth.uid() = user_id);
+
+create policy "Users can cast votes for themselves"
+  on public.votes for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can remove their own votes"
+  on public.votes for delete
+  using (auth.uid() = user_id);
+
+-- Public aggregate: total up/down per tutorial, visible to every visitor
+-- (including signed-out ones), without exposing who voted which way.
+create view public.vote_counts as
+  select tutorial_id,
+         count(*) filter (where direction = 'up') as up,
+         count(*) filter (where direction = 'down') as down
+  from public.votes
+  group by tutorial_id;
+
+grant select on public.vote_counts to anon, authenticated;

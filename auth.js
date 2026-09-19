@@ -13,10 +13,13 @@ let currentUser = null;
 let currentProfile = null;
 let savedSet = new Set();
 let completedSet = new Set();
+let voteCounts = new Map();  // tutorial_id -> {up, down} — public, loaded for everyone
+let myVotes = new Map();     // tutorial_id -> 'up' | 'down' — only when signed in
 let authReadyResolve;
 const authReady = new Promise(res => { authReadyResolve = res; });
 
 async function initAuth() {
+  await loadVoteCounts();
   const { data: { session } } = await sb.auth.getSession();
   await handleSession(session);
   authReadyResolve();
@@ -33,9 +36,20 @@ async function handleSession(session) {
     currentProfile = null;
     savedSet = new Set();
     completedSet = new Set();
+    myVotes = new Map();
     return;
   }
-  await Promise.all([loadProfile(), loadSavedAndCompleted()]);
+  await Promise.all([loadProfile(), loadSavedAndCompleted(), loadMyVotes()]);
+}
+
+async function loadVoteCounts() {
+  const { data } = await sb.from('vote_counts').select('*');
+  voteCounts = new Map((data || []).map(r => [r.tutorial_id, { up: r.up, down: r.down }]));
+}
+
+async function loadMyVotes() {
+  const { data } = await sb.from('votes').select('tutorial_id, direction').eq('user_id', currentUser.id);
+  myVotes = new Map((data || []).map(r => [r.tutorial_id, r.direction]));
 }
 
 async function loadProfile() {
@@ -103,3 +117,36 @@ async function toggleCompleted(tutorialId) {
 
 function getSavedIds() { return Array.from(savedSet); }
 function getCompletedIds() { return Array.from(completedSet); }
+
+// Returns { up, down, score, myVote } for one entry — same shape the UI
+// already expects, now backed by Supabase instead of localStorage.
+function getVoteState(tutorialId) {
+  const counts = voteCounts.get(tutorialId) || { up: 0, down: 0 };
+  const mine = myVotes.get(tutorialId) || null;
+  return { up: counts.up, down: counts.down, score: counts.up - counts.down, myVote: mine };
+}
+
+// Casts or toggles a vote. Requires being signed in. Clicking the same
+// direction again removes it; clicking the other direction switches it.
+async function castVote(tutorialId, direction) {
+  if (!currentUser) return { error: 'not-signed-in' };
+
+  const counts = voteCounts.get(tutorialId) || { up: 0, down: 0 };
+  const prev = myVotes.get(tutorialId) || null;
+
+  if (prev) {
+    await sb.from('votes').delete().eq('user_id', currentUser.id).eq('tutorial_id', tutorialId);
+    counts[prev] = Math.max(0, counts[prev] - 1);
+  }
+
+  if (prev === direction) {
+    myVotes.delete(tutorialId);
+  } else {
+    await sb.from('votes').insert({ user_id: currentUser.id, tutorial_id: tutorialId, direction });
+    counts[direction] = (counts[direction] || 0) + 1;
+    myVotes.set(tutorialId, direction);
+  }
+
+  voteCounts.set(tutorialId, counts);
+  return getVoteState(tutorialId);
+}

@@ -266,8 +266,8 @@ function renderTool(toolKey) {
     const saveBtn = e.target.closest('.save-btn');
     const completeBtn = e.target.closest('.complete-btn');
     if (voteBtn) {
-      castVote(voteBtn.dataset.id, voteBtn.dataset.dir);
-      renderTool(toolKey);
+      if (!getCurrentUser()) { openAuthModal('signin'); return; }
+      castVote(voteBtn.dataset.id, voteBtn.dataset.dir).then(() => renderTool(toolKey));
       return;
     }
     if (saveBtn) {
@@ -456,7 +456,7 @@ function renderAccount() {
       const voteBtn = e.target.closest('.vote-btn');
       const saveBtn = e.target.closest('.save-btn');
       const completeBtn = e.target.closest('.complete-btn');
-      if (voteBtn) { castVote(voteBtn.dataset.id, voteBtn.dataset.dir); renderAccount(); }
+      if (voteBtn) { castVote(voteBtn.dataset.id, voteBtn.dataset.dir).then(() => renderAccount()); }
       if (saveBtn) { toggleSaved(saveBtn.dataset.id).then(() => renderAccount()); }
       if (completeBtn) { toggleCompleted(completeBtn.dataset.id).then(() => renderAccount()); }
     });

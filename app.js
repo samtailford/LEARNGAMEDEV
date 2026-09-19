@@ -419,7 +419,7 @@ function findEntryById(id) {
   for (const toolKey of Object.keys(DATA)) {
     const entries = allEntries(toolKey);
     const found = entries.find(e => e.id === id);
-    if (found) return { ...found, toolKey };
+    if (found) return { ...found, toolKey, vote: getVoteState(found.id) };
   }
   return null;
 }

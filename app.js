@@ -388,7 +388,7 @@ function renderMore() {
       <div class="more-section">
         <h2>Contact</h2>
         <div class="contact-box">
-          <p>Email: <strong>hello@learngamedev.com</strong> <em>(placeholder — swap once the domain's live)</em></p>
+          <p>Email: <strong>samtailford3@gmail.com</strong></p>
           <p>Socials: coming soon.</p>
         </div>
       </div>
@@ -411,7 +411,7 @@ function renderMore() {
     if (!text) { document.getElementById('feedback-text').focus(); return; }
     const subject = encodeURIComponent('LearnGameDev feedback');
     const body = encodeURIComponent(text + (email ? `\n\nReply to: ${email}` : ''));
-    window.location.href = `mailto:hello@learngamedev.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:samtailford3@gmail.com?subject=${subject}&body=${body}`;
   });
 }
 

@@ -58,13 +58,15 @@ function isSaved(tutorialId) { return savedSet.has(tutorialId); }
 function isCompleted(tutorialId) { return completedSet.has(tutorialId); }
 
 async function signUp(email, password, username) {
-  const { data, error } = await sb.auth.signUp({ email, password });
+  const { data, error } = await sb.auth.signUp({
+    email,
+    password,
+    options: { data: { username } }
+  });
   if (error) return { error };
-  if (data.user) {
-    const { error: profileError } = await sb.from('profiles').insert({ id: data.user.id, username });
-    if (profileError) return { error: profileError };
-  }
-  return { data };
+  // If email confirmation is required, Supabase returns a user but no
+  // session yet — the profile row is still created by a DB trigger.
+  return { data, needsEmailConfirm: !data.session };
 }
 
 async function signIn(email, password) {

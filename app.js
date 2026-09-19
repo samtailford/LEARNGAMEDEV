@@ -110,6 +110,17 @@ function renderAuthModal(mode, errorMsg) {
       renderAuthModal(mode, result.error.message || 'Something went wrong.');
       return;
     }
+    if (result.needsEmailConfirm) {
+      const overlay = document.getElementById('auth-modal-overlay');
+      overlay.innerHTML = `
+        <div class="auth-modal">
+          <button class="auth-modal-close" id="auth-modal-close">&times;</button>
+          <h2>Check your email</h2>
+          <p class="auth-modal-sub">We sent a confirmation link to ${esc(email)}. Click it, then sign in here.</p>
+        </div>`;
+      document.getElementById('auth-modal-close').addEventListener('click', closeAuthModal);
+      return;
+    }
     closeAuthModal();
   });
 }

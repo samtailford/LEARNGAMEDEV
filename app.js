@@ -437,7 +437,7 @@ function renderAccount() {
     <a href="#/" class="back-link">&larr; All tools</a>
     <div class="account-page">
       <h1>${esc(profile ? profile.username : user.email)}</h1>
-      <p class="lead">${completedEntries.length} tutorials completed &middot; ${savedEntries.length} saved</p>
+      <p class="lead">${completedEntries.length} tutorial${completedEntries.length === 1 ? '' : 's'} completed &middot; ${savedEntries.length} saved</p>
 
       <div class="more-section">
         <h2>Saved (${savedEntries.length})</h2>

@@ -142,8 +142,8 @@ function renderHome() {
 
   app.innerHTML = `
     <div class="hero">
-      <h1>Free tutorials that actually finish something.</h1>
-      <p>Games can be made with just one of the game engines and some free assets found in <a href="#/more">More</a>. This compendium covers every aspect of gaming — pick your tool.</p>
+      <h1>LEARNGAMEDEV</h1>
+      <p>A compendium of free, complete tutorials and tutorial series. You can find assets and links to text-based tutorial hubs and other handy stuff in the <a href="#/more">More</a> section. This compendium covers every aspect of game development — pick your tool.</p>
     </div>
     <div class="tool-grid">${cards}</div>
   `;

@@ -3811,6 +3811,32 @@
         "link": "https://www.youtube.com/watch?v=BIchRbxiWms",
         "id": "figma-figma-game-ui-design-rpg-companion-hud-pack",
         "verified": false
+      },
+      {
+        "category": "Mobile/Roblox HUD - currency and shop screen",
+        "title": "The Greatest Stud UI Tutorial on Roblox (w/ Figma)",
+        "creator": "Kek",
+        "level": "Intermediate",
+        "outcome": "Fully styled, game-ready front-page HUD panel: background, header, exit button, textured currency icons, buy button, gem icon, nav buttons, live currency counter, slow-mode toggle - a complete connected screen",
+        "length": "1h01m",
+        "date": "Jun 13 2026",
+        "access": "Free, YouTube",
+        "link": "https://www.youtube.com/watch?v=gnIKtS3nUqo",
+        "id": "figma-the-greatest-stud-ui-tutorial-on-roblox-w-figma",
+        "verified": false
+      },
+      {
+        "category": "Mobile game UI - task/quest-list screen (Figma to Unity pipeline)",
+        "title": "Game UI Wireframing in Procreate and Figma Tutorial, Parts 1-2 (Daily Task Screen)",
+        "creator": "Warren Winters",
+        "level": "Intermediate",
+        "outcome": "Complete, art-skinned Daily Task screen: Procreate-sketched wireframe, Figma whitebox with componentized list items and auto layout, full art-pass skinning, asset export, assembled as a working scrollable task list in Unity",
+        "length": "~67 min combined across 2 parts",
+        "date": "Jan 22 2025",
+        "access": "Free, YouTube",
+        "link": "https://www.youtube.com/watch?v=1rVqDYPU6CU",
+        "id": "figma-game-ui-wireframing-in-procreate-and-figma-tutorial-parts-1-2-daily-task-screen",
+        "verified": false
       }
     ],
     "older": [
@@ -3921,5 +3947,181 @@
         "verified": false
       }
     ]
+  },
+  "reaper": {
+    "current": [
+      {
+        "category": "Game SFX",
+        "title": "Elden Ring Nightreign SFX Redesign: My Layer-by-Layer Breakdown",
+        "creator": "David Dumais Audio",
+        "level": "Int/Adv",
+        "outcome": "Fully redesigned, layered set of game SFX built from raw source recordings to polished final sounds",
+        "length": "22:27",
+        "date": "Jun 23 2025",
+        "access": "Free, YouTube",
+        "link": "https://www.youtube.com/watch?v=gUBZdF0QUHY",
+        "id": "reaper-elden-ring-nightreign-sfx-redesign-my-layer-by-layer-breakdown",
+        "verified": false
+      },
+      {
+        "category": "Game SFX",
+        "title": "How I Redesigned Sounds From The Video Game THE PLUCKY SQUIRE",
+        "creator": "David Dumais Audio",
+        "level": "Int/Adv",
+        "outcome": "Finished set of redesigned game SFX, layered and processed start to finish in Reaper",
+        "length": "23:16",
+        "date": "Mar 17 2025",
+        "access": "Free, YouTube",
+        "link": "https://www.youtube.com/watch?v=eCS266-6sVo",
+        "id": "reaper-how-i-redesigned-sounds-from-the-video-game-the-plucky-squire",
+        "verified": false
+      },
+      {
+        "category": "Game SFX",
+        "title": "Making Video Game Sounds from Scratch - Featuring Pro Sound Effects",
+        "creator": "Akash Thakkar",
+        "level": "Beg/Int",
+        "outcome": "Set of finished, exported video-game sound effects built from a pro SFX library",
+        "length": "25:04",
+        "date": "Jun 25 2025",
+        "access": "Free, YouTube",
+        "link": "https://www.youtube.com/watch?v=upywkR0j_M0",
+        "id": "reaper-making-video-game-sounds-from-scratch-featuring-pro-sound-effects",
+        "verified": false
+      },
+      {
+        "category": "Voiceover/Audiobook",
+        "title": "How to EASILY Meet ACX Audiobook Specifications with Reaper",
+        "creator": "Jay Myers Voiceover",
+        "level": "Intermediate",
+        "outcome": "ACX-compliant, loudness-checked, silence-trimmed finished audiobook file ready for submission",
+        "length": "26:35",
+        "date": "Jan 20 2025",
+        "access": "Free, YouTube",
+        "link": "https://www.youtube.com/watch?v=aRALdg7u3eY",
+        "id": "reaper-how-to-easily-meet-acx-audiobook-specifications-with-reaper",
+        "verified": false
+      }
+    ],
+    "older": [
+      {
+        "category": "Game SFX/Ad Sound Design",
+        "title": "Reaper Tutorial - Sound Design for Beginners",
+        "creator": "Envato Tuts+",
+        "level": "Beginner",
+        "outcome": "Fully sound-designed sports-drink ad - edited video, music, VO, layered/stitched SFX, mixed and processed",
+        "length": "2h32m",
+        "date": "Sept 20 2023",
+        "access": "Free, YouTube",
+        "link": "https://www.youtube.com/watch?v=DNBYS4Q0P2g",
+        "id": "reaper-reaper-tutorial-sound-design-for-beginners",
+        "verified": false
+      },
+      {
+        "category": "Podcast editing",
+        "title": "Reaper Tutorial - How to Edit a Podcast",
+        "creator": "Envato Tuts+",
+        "level": "Beginner",
+        "outcome": "Polished, denoised, EQ'd, compressed, ripple-edited podcast episode, rendered and publish-ready",
+        "length": "2h17m",
+        "date": "Nov 2 2022",
+        "access": "Free, YouTube",
+        "link": "https://www.youtube.com/watch?v=y-Tu14fG4C8",
+        "id": "reaper-reaper-tutorial-how-to-edit-a-podcast",
+        "verified": false
+      },
+      {
+        "category": "Podcast editing",
+        "title": "REAPER podcast editing tutorial (step-by-step for BEGINNERS)",
+        "creator": "Pete McPherson (Do You Even Blog)",
+        "level": "Beginner",
+        "outcome": "Complete, edited podcast episode using a full Reaper A-Z workflow",
+        "length": "44:51",
+        "date": "Aug 4 2021",
+        "access": "Free, YouTube",
+        "link": "https://www.youtube.com/watch?v=jukVjRj-wZ8",
+        "id": "reaper-reaper-podcast-editing-tutorial-step-by-step-for-beginners",
+        "verified": false
+      },
+      {
+        "category": "Podcast editing",
+        "title": "Reaper for Podcasting: A Beginner's Guide for New Users",
+        "creator": "Reaper for Podcasting (Daniel Abendroth)",
+        "level": "Beginner",
+        "outcome": "Basic edited episode, recorded and rendered to a finished MP3",
+        "length": "17:03",
+        "date": "Dec 20 2020",
+        "access": "Free, YouTube",
+        "link": "https://www.youtube.com/watch?v=CPeUilYS4rc",
+        "id": "reaper-reaper-for-podcasting-a-beginner-s-guide-for-new-users",
+        "verified": false
+      },
+      {
+        "category": "Voiceover/Audiobook",
+        "title": "How To Edit an Audiobook like a Professional Narrator (in Reaper)",
+        "creator": "Jay Myers Voiceover",
+        "level": "Intermediate",
+        "outcome": "Cleaned-up, pickup-corrected, finished audiobook chapter recording",
+        "length": "18:41",
+        "date": "Nov 15 2023",
+        "access": "Free, YouTube",
+        "link": "https://www.youtube.com/watch?v=gXECinwcCVw",
+        "id": "reaper-how-to-edit-an-audiobook-like-a-professional-narrator-in-reaper",
+        "verified": false
+      },
+      {
+        "category": "Music mixing",
+        "title": "Mixing a song on Reaper - My mixing process",
+        "creator": "Paul Douglas",
+        "level": "Intermediate",
+        "outcome": "Fully mixed instrumental piano beat production track",
+        "length": "26:01",
+        "date": "Oct 3 2020",
+        "access": "Free, YouTube",
+        "link": "https://www.youtube.com/watch?v=1xfU7IM4oBU",
+        "id": "reaper-mixing-a-song-on-reaper-my-mixing-process",
+        "verified": false
+      },
+      {
+        "category": "Music mixing",
+        "title": "Mixing Rock with REAPER Stock Plugins",
+        "creator": "The REAPER Blog (Jon Tidey)",
+        "level": "Intermediate",
+        "outcome": "Fully mixed rock song using only Reaper's free stock plugins",
+        "length": "1h17m",
+        "date": "Jul 12 2019",
+        "access": "Free, YouTube",
+        "link": "https://www.youtube.com/watch?v=WQZ0nivlCvQ",
+        "id": "reaper-mixing-rock-with-reaper-stock-plugins",
+        "verified": false
+      },
+      {
+        "category": "Music mixing (vocals)",
+        "title": "Mixing VOCALS with Reaper's STOCK PLUGINS",
+        "creator": "Dominik Wodzu Bodzek",
+        "level": "Intermediate",
+        "outcome": "Polished vocal mix processed entirely with Reaper's free stock EQ/comp/de-esser/saturation plugins",
+        "length": "16:36",
+        "date": "Oct 20 2021",
+        "access": "Free, YouTube",
+        "link": "https://www.youtube.com/watch?v=6p1McP-uDmw",
+        "id": "reaper-mixing-vocals-with-reaper-s-stock-plugins",
+        "verified": false
+      },
+      {
+        "category": "Music mastering",
+        "title": "How to Master a Song in Reaper with iZotope Ozone",
+        "creator": "iZotope, Inc.",
+        "level": "Intermediate",
+        "outcome": "Mastered song delivered to CD and streaming loudness specs",
+        "length": "17:14",
+        "date": "Jul 21 2022",
+        "access": "Free, YouTube",
+        "link": "https://www.youtube.com/watch?v=-gc-XKr1FUk",
+        "id": "reaper-how-to-master-a-song-in-reaper-with-izotope-ozone",
+        "verified": false
+      }
+    ],
+    "outdated": []
   }
 }

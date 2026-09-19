@@ -28,6 +28,92 @@ function buildNav() {
   }).join('');
 }
 
+function onAuthChange() {
+  renderAccountArea();
+  route();
+}
+
+function renderAccountArea() {
+  const area = document.getElementById('account-area');
+  const user = getCurrentUser();
+  const profile = getCurrentProfile();
+  if (!user) {
+    area.innerHTML = `<button class="signin-btn" id="signin-open-btn">Sign in</button>`;
+    document.getElementById('signin-open-btn').addEventListener('click', () => openAuthModal('signin'));
+    return;
+  }
+  const name = profile ? profile.username : user.email;
+  area.innerHTML = `
+    <a href="#/account" class="account-pill">${esc(name)}</a>
+    <button class="signout-btn" id="signout-btn" title="Sign out">&#8594;</button>
+  `;
+  document.getElementById('signout-btn').addEventListener('click', async () => {
+    await signOut();
+  });
+}
+
+function openAuthModal(mode) {
+  const overlay = document.getElementById('auth-modal-overlay');
+  overlay.style.display = 'flex';
+  renderAuthModal(mode || 'signin', '');
+
+  overlay.onclick = (e) => { if (e.target === overlay) closeAuthModal(); };
+}
+
+function closeAuthModal() {
+  const overlay = document.getElementById('auth-modal-overlay');
+  overlay.style.display = 'none';
+  overlay.innerHTML = '';
+}
+
+function renderAuthModal(mode, errorMsg) {
+  const overlay = document.getElementById('auth-modal-overlay');
+  const isSignUp = mode === 'signup';
+  overlay.innerHTML = `
+    <div class="auth-modal">
+      <button class="auth-modal-close" id="auth-modal-close">&times;</button>
+      <h2>${isSignUp ? 'Create an account' : 'Sign in'}</h2>
+      <p class="auth-modal-sub">${isSignUp ? 'Save tutorials, track what you\'ve completed.' : 'Welcome back.'}</p>
+      ${errorMsg ? `<p class="auth-error">${esc(errorMsg)}</p>` : ''}
+      <form id="auth-form">
+        ${isSignUp ? `<input type="text" id="auth-username" placeholder="Username" required minlength="3" maxlength="24">` : ''}
+        <input type="email" id="auth-email" placeholder="Email" required>
+        <input type="password" id="auth-password" placeholder="Password" required minlength="6">
+        <button type="submit" class="auth-submit-btn">${isSignUp ? 'Create account' : 'Sign in'}</button>
+      </form>
+      <p class="auth-switch">
+        ${isSignUp ? 'Already have an account?' : "Don't have an account?"}
+        <a href="#" id="auth-switch-link">${isSignUp ? 'Sign in' : 'Sign up'}</a>
+      </p>
+    </div>
+  `;
+  document.getElementById('auth-modal-close').addEventListener('click', closeAuthModal);
+  document.getElementById('auth-switch-link').addEventListener('click', (e) => {
+    e.preventDefault();
+    renderAuthModal(isSignUp ? 'signin' : 'signup', '');
+  });
+  document.getElementById('auth-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value;
+    const submitBtn = e.target.querySelector('.auth-submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Working...';
+    let result;
+    if (isSignUp) {
+      const username = document.getElementById('auth-username').value.trim();
+      result = await signUp(email, password, username);
+    } else {
+      result = await signIn(email, password);
+    }
+    if (result.error) {
+      renderAuthModal(mode, result.error.message || 'Something went wrong.');
+      return;
+    }
+    closeAuthModal();
+  });
+}
+
 function renderHome() {
   document.title = 'LearnGameDev — Free tutorials that actually finish something';
   const cards = Object.keys(TOOL_META).map(key => {
@@ -165,10 +251,24 @@ function renderTool(toolKey) {
   });
 
   app.querySelector('.card-grid').addEventListener('click', e => {
-    const btn = e.target.closest('.vote-btn');
-    if (!btn) return;
-    castVote(btn.dataset.id, btn.dataset.dir);
-    renderTool(toolKey);
+    const voteBtn = e.target.closest('.vote-btn');
+    const saveBtn = e.target.closest('.save-btn');
+    const completeBtn = e.target.closest('.complete-btn');
+    if (voteBtn) {
+      castVote(voteBtn.dataset.id, voteBtn.dataset.dir);
+      renderTool(toolKey);
+      return;
+    }
+    if (saveBtn) {
+      if (!getCurrentUser()) { openAuthModal('signin'); return; }
+      toggleSaved(saveBtn.dataset.id).then(() => renderTool(toolKey));
+      return;
+    }
+    if (completeBtn) {
+      if (!getCurrentUser()) { openAuthModal('signin'); return; }
+      toggleCompleted(completeBtn.dataset.id).then(() => renderTool(toolKey));
+      return;
+    }
   });
 }
 
@@ -198,6 +298,8 @@ function cardHtml(e) {
       <div class="card-bottom-row">
         <a class="watch-link" href="${esc(e.link)}" target="_blank" rel="noopener noreferrer">View tutorial &rarr;</a>
         <div class="vote-group">
+          <button class="save-btn ${isSaved(e.id) ? 'active' : ''}" data-id="${esc(e.id)}" title="Save for later">${isSaved(e.id) ? '&#9733;' : '&#9734;'}</button>
+          <button class="complete-btn ${isCompleted(e.id) ? 'active' : ''}" data-id="${esc(e.id)}" title="Mark completed">&#10003;</button>
           <button class="vote-btn ${v.myVote === 'up' ? 'voted' : ''}" data-id="${esc(e.id)}" data-dir="up" title="Helpful">&#128077; <span>${v.up}</span></button>
           <button class="vote-btn ${v.myVote === 'down' ? 'voted' : ''}" data-id="${esc(e.id)}" data-dir="down" title="Not helpful">&#128078; <span>${v.down}</span></button>
         </div>
@@ -302,6 +404,54 @@ function renderMore() {
   });
 }
 
+function findEntryById(id) {
+  for (const toolKey of Object.keys(DATA)) {
+    const entries = allEntries(toolKey);
+    const found = entries.find(e => e.id === id);
+    if (found) return { ...found, toolKey };
+  }
+  return null;
+}
+
+function renderAccount() {
+  const user = getCurrentUser();
+  if (!user) { location.hash = '#/'; return; }
+  document.title = 'My Account — LearnGameDev';
+
+  const profile = getCurrentProfile();
+  const savedEntries = getSavedIds().map(findEntryById).filter(Boolean);
+  const completedEntries = getCompletedIds().map(findEntryById).filter(Boolean);
+
+  app.innerHTML = `
+    <a href="#/" class="back-link">&larr; All tools</a>
+    <div class="account-page">
+      <h1>${esc(profile ? profile.username : user.email)}</h1>
+      <p class="lead">${completedEntries.length} tutorials completed &middot; ${savedEntries.length} saved</p>
+
+      <div class="more-section">
+        <h2>Saved (${savedEntries.length})</h2>
+        <div class="card-grid" id="saved-grid">${savedEntries.length ? savedEntries.map(cardHtml).join('') : '<p class="empty-state">Nothing saved yet — click Save on any tutorial card.</p>'}</div>
+      </div>
+
+      <div class="more-section">
+        <h2>Completed (${completedEntries.length})</h2>
+        <div class="card-grid" id="completed-grid">${completedEntries.length ? completedEntries.map(cardHtml).join('') : '<p class="empty-state">Nothing marked complete yet.</p>'}</div>
+      </div>
+    </div>
+  `;
+
+  app.querySelectorAll('.card-grid').forEach(grid => {
+    grid.addEventListener('click', e => {
+      const voteBtn = e.target.closest('.vote-btn');
+      const saveBtn = e.target.closest('.save-btn');
+      const completeBtn = e.target.closest('.complete-btn');
+      if (voteBtn) { castVote(voteBtn.dataset.id, voteBtn.dataset.dir); renderAccount(); }
+      if (saveBtn) { toggleSaved(saveBtn.dataset.id).then(() => renderAccount()); }
+      if (completeBtn) { toggleCompleted(completeBtn.dataset.id).then(() => renderAccount()); }
+    });
+  });
+}
+
 function route() {
   const hash = location.hash.replace(/^#\/?/, '');
   toolNav.querySelectorAll('a').forEach(a => a.classList.toggle('active', a.dataset.tool === hash));
@@ -314,6 +464,10 @@ function route() {
   }
   if (hash === 'more') {
     renderMore();
+    return;
+  }
+  if (hash === 'account') {
+    renderAccount();
     return;
   }
   if (TOOL_META[hash]) {
@@ -334,5 +488,7 @@ window.addEventListener('hashchange', route);
 (async function init() {
   buildNav();
   await loadData();
+  await initAuth();
+  renderAccountArea();
   route();
 })();

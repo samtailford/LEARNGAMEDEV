@@ -73,6 +73,15 @@ const TOOL_ICONS = {
     <circle cx="26" cy="53" r="9" fill="currentColor" opacity="0.55"/>
     <path d="M36 26a9 9 0 100 18 9 9 0 000-18z" fill="currentColor" opacity="0.85"/>
     <path d="M17 8h9v18h-9a9 9 0 010-18z" fill="currentColor" opacity="0.4"/>
+  </svg>`,
+  reaper: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="8" y="24" width="4" height="16" rx="2" fill="currentColor" opacity="0.5"/>
+    <rect x="15" y="16" width="4" height="32" rx="2" fill="currentColor" opacity="0.8"/>
+    <rect x="22" y="8" width="4" height="48" rx="2" fill="currentColor"/>
+    <rect x="29" y="20" width="4" height="24" rx="2" fill="currentColor" opacity="0.7"/>
+    <rect x="36" y="12" width="4" height="40" rx="2" fill="currentColor" opacity="0.9"/>
+    <rect x="43" y="26" width="4" height="12" rx="2" fill="currentColor" opacity="0.5"/>
+    <rect x="50" y="18" width="4" height="28" rx="2" fill="currentColor" opacity="0.75"/>
   </svg>`
 };
 
@@ -87,5 +96,6 @@ const TOOL_META = {
   krita: { label: "Krita", tagline: "Finished paintings, not abandoned sketches.", accent: "#f06292", downloadUrl: "https://krita.org/en/download/krita-desktop/", downloadNote: "Free" },
   construct3: { label: "Construct 3", tagline: "No-code 2D games that actually have a win state.", accent: "#5fd0e0", downloadUrl: "https://www.construct.net/en/make-games/construct-3", downloadNote: "Free tier" },
   audacity: { label: "Audacity", tagline: "Finished, exported audio — SFX, voice, and mixes.", accent: "#c4a5e0", downloadUrl: "https://www.audacityteam.org/download/", downloadNote: "Free" },
-  figma: { label: "Figma", tagline: "Real, finished game UI and HUD designs.", accent: "#5fd97a", downloadUrl: "https://www.figma.com/downloads/", downloadNote: "Free tier" }
+  figma: { label: "Figma", tagline: "Real, finished game UI and HUD designs.", accent: "#5fd97a", downloadUrl: "https://www.figma.com/downloads/", downloadNote: "Free tier" },
+  reaper: { label: "Reaper", tagline: "Finished game SFX, voiceover, and mixes.", accent: "#8fa8c4", downloadUrl: "https://www.reaper.fm/download.php", downloadNote: "Unlimited free eval" }
 };

@@ -4,6 +4,8 @@ const toolNav = document.getElementById('tool-nav');
 const state = {
   era: 'all',       // 'all' | 'current' | 'older'
   category: 'all',
+  level: 'all',     // 'all' | 'Beginner' | 'Intermediate' | 'Advanced'
+  length: 'all',    // 'all' | 'short' | 'medium' | 'long'
   query: '',
   sort: 'default',  // 'default' | 'rating'
   userRecommended: false,
@@ -15,6 +17,48 @@ const WEB3FORMS_ACCESS_KEY = '444d642e-e41c-48eb-9d65-38c0086ddcbb'; // from web
 
 function esc(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// The "level" field is free text like "Beg/Int" or "Absolute beginner" —
+// match by substring so every variant lands in the right bucket(s).
+function levelBuckets(raw) {
+  const s = (raw || '').toLowerCase();
+  const out = [];
+  if (s.includes('beg')) out.push('Beginner');
+  if (s.includes('int')) out.push('Intermediate');
+  if (s.includes('adv')) out.push('Advanced');
+  return out;
+}
+
+// The "length" field is free text ("23 min", "1h17m", "16-part series", ...)
+// rather than a clean duration. Parse what we can into total minutes and
+// bucket it; fall back to keyword heuristics when there's no parsable number.
+function estimateMinutes(raw) {
+  const s = raw.toLowerCase();
+  let m;
+  if ((m = s.match(/(\d+)\s*h(?:r|our)?s?\s*(\d+)\s*m/))) return +m[1] * 60 + +m[2];
+  if ((m = s.match(/^(\d+):(\d+)$/))) return +m[1] + (+m[2] >= 30 ? 1 : 0);
+  if ((m = s.match(/(\d+)\s*[-–]\s*(\d+)\s*hrs?\b/))) return (+m[1] + +m[2]) / 2 * 60;
+  if ((m = s.match(/(\d+(?:\.\d+)?)\s*\+?\s*(?:hrs?|hours?)\b/))) return parseFloat(m[1]) * 60 + (s.includes('+') ? 1 : 0);
+  if ((m = s.match(/^(\d+)h$/))) return +m[1] * 60;
+  if ((m = s.match(/(\d+)\s*[-–]\s*(\d+)\s*min/))) return (+m[1] + +m[2]) / 2;
+  if ((m = s.match(/(\d+(?:\.\d+)?)\s*\+?\s*min/))) return parseFloat(m[1]) + (s.includes('+') ? 1 : 0);
+  if ((m = s.match(/(\d+)\s*(?:parts?|episodes?|eps?)\b/))) return +m[1] * 15;
+  return null;
+}
+
+function lengthBucket(raw) {
+  const s = (raw || '').toLowerCase();
+  let minutes = estimateMinutes(s);
+  if (minutes == null) {
+    if (/course|mini-degree|ongoing|long/.test(s)) minutes = 300;
+    else if (/single (video|upload)|sample|docs|files/.test(s)) minutes = 30;
+    else if (/written|walkthrough|series|multi-part|multi-lesson/.test(s)) minutes = 120;
+    else return null;
+  }
+  if (minutes <= 60) return 'short';
+  if (minutes <= 240) return 'medium';
+  return 'long';
 }
 
 async function loadData() {
@@ -169,6 +213,8 @@ function renderTool(toolKey) {
   let filtered = entries.filter(e => {
     if (state.era !== 'all' && e.era !== state.era) return false;
     if (state.category !== 'all' && e.category !== state.category) return false;
+    if (state.level !== 'all' && !levelBuckets(e.level).includes(state.level)) return false;
+    if (state.length !== 'all' && lengthBucket(e.length) !== state.length) return false;
     if (state.verifiedOnly && !e.verified) return false;
     if (state.userRecommended && e.vote.score < USER_RECOMMENDED_MIN_SCORE) return false;
     if (state.query) {
@@ -188,6 +234,8 @@ function renderTool(toolKey) {
   const outdatedCount = entries.filter(e => e.era === 'outdated').length;
   const verifiedCount = entries.filter(e => e.verified).length;
   const userRecCount = entries.filter(e => e.vote.score >= USER_RECOMMENDED_MIN_SCORE).length;
+  const levelCount = lvl => entries.filter(e => levelBuckets(e.level).includes(lvl)).length;
+  const lengthCount = len => entries.filter(e => lengthBucket(e.length) === len).length;
 
   app.innerHTML = `
     <a href="#/" class="back-link">&larr; All tools</a>
@@ -226,6 +274,26 @@ function renderTool(toolKey) {
       <div class="category-pills">
         ${categories.map(c => `<button data-cat="${esc(c)}" class="${state.category === c ? 'active' : ''}">${c === 'all' ? 'All categories' : esc(c)}</button>`).join('')}
       </div>
+      <div class="filter-row">
+        <div class="filter-group">
+          <span class="filter-label">Level</span>
+          <div class="category-pills">
+            <button data-level="all" class="${state.level === 'all' ? 'active' : ''}">All</button>
+            <button data-level="Beginner" class="${state.level === 'Beginner' ? 'active' : ''}">Beginner (${levelCount('Beginner')})</button>
+            <button data-level="Intermediate" class="${state.level === 'Intermediate' ? 'active' : ''}">Intermediate (${levelCount('Intermediate')})</button>
+            <button data-level="Advanced" class="${state.level === 'Advanced' ? 'active' : ''}">Advanced (${levelCount('Advanced')})</button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">Length</span>
+          <div class="category-pills">
+            <button data-length="all" class="${state.length === 'all' ? 'active' : ''}">All</button>
+            <button data-length="short" class="${state.length === 'short' ? 'active' : ''}">Short, &lt;1hr (${lengthCount('short')})</button>
+            <button data-length="medium" class="${state.length === 'medium' ? 'active' : ''}">Medium, 1-4hr (${lengthCount('medium')})</button>
+            <button data-length="long" class="${state.length === 'long' ? 'active' : ''}">Long, 4hr+ (${lengthCount('long')})</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <p class="result-count">${filtered.length} tutorial${filtered.length === 1 ? '' : 's'}</p>
@@ -258,8 +326,14 @@ function renderTool(toolKey) {
     state.userRecommended = !state.userRecommended;
     renderTool(toolKey);
   });
-  app.querySelectorAll('.category-pills button').forEach(btn => {
+  app.querySelectorAll('.category-pills button[data-cat]').forEach(btn => {
     btn.addEventListener('click', () => { state.category = btn.dataset.cat; renderTool(toolKey); });
+  });
+  app.querySelectorAll('.category-pills button[data-level]').forEach(btn => {
+    btn.addEventListener('click', () => { state.level = btn.dataset.level; renderTool(toolKey); });
+  });
+  app.querySelectorAll('.category-pills button[data-length]').forEach(btn => {
+    btn.addEventListener('click', () => { state.length = btn.dataset.length; renderTool(toolKey); });
   });
 
   app.querySelector('.card-grid').addEventListener('click', e => {

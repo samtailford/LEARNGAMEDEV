@@ -188,12 +188,22 @@ function renderHome() {
       </a>`;
   }).join('');
 
+  const comingSoonCard = `
+    <div class="tool-card coming-soon">
+      <div class="icon"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22 16L8 32l14 16M42 16l14 16-14 16M36 12L28 52" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg></div>
+      <h2>Coding Languages</h2>
+      <p class="tagline">Python, C#, GDScript, C++, and more — vetted free tutorials that finish something.</p>
+      <span class="count">Coming soon</span>
+    </div>`;
+
   app.innerHTML = `
     <div class="hero">
       <h1>LEARNGAMEDEV</h1>
       <p>A compendium of free, complete tutorials and tutorial series. You can find assets and links to text-based tutorial hubs and other handy stuff in the <a href="#/more">More</a> section. This compendium covers every aspect of game development — pick your tool.</p>
     </div>
-    <div class="tool-grid">${cards}</div>
+    <div class="tool-grid">${cards}${comingSoonCard}</div>
   `;
 }
 

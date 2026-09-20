@@ -131,6 +131,10 @@ main { max-width: 1120px; margin: 0 auto; padding: 40px 24px 80px; }
   margin: 0 0 16px;
   line-height: 1.4;
 }
+.tool-card.coming-soon { cursor: default; opacity: 0.6; }
+.tool-card.coming-soon:hover { transform: none; background: var(--bg-card); border-color: var(--border); }
+.tool-card.coming-soon .count { color: var(--text-faint); }
+
 .tool-card .count {
   display: inline-block;
   font-size: 12px;
